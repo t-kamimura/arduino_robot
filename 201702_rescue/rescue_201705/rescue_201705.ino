@@ -6,8 +6,7 @@
 // 2. ST7032
 //    以下のサイトを参考にしてZIPファイルをダウンロード
 //    http://blog.icchi.me/arduino-aqm0802a/
-
-#include "DualVNH5019MotorShield.h"
+#include "DualMC33926MotorShield.h"
 #include <Wire.h>
 #include <ST7032.h>
 
@@ -23,22 +22,17 @@ int valError = 0;         // 前後のセンサーの値を比較する用
 int threshold = 15;       // しきい値
 const int pingPin = 13;   // PINGセンサーを使うとき用
 
-DualVNH5019MotorShield md;
+DualMC33926MotorShield md;
 ST7032 lcd;
 
 // モーターエラー関数
 void stopIfFault()
 {
-  if (md.getM1Fault())
+  if (md.getFault())
   {
     lcd.setCursor(0, 1);
     lcd.print("M1 err");
-    while(1);
-  }
-  if (md.getM2Fault())
-  {
-    lcd.setCursor(0, 1);
-    lcd.print("M2 err");
+    Serial.println("Motor err");
     while(1);
   }
 }
@@ -51,6 +45,8 @@ void setup() {
   lcd.begin(16, 2);           // LCD初期化
   lcd.setContrast(30);        // LCDコントラスト設定
   lcd.print("DEMO");          // LCD表示
+  delay(1000);
+  Serial.println("Start");
 }
 
 // 以下、メイン関数
@@ -62,12 +58,6 @@ void loop() {
     digitalWrite(ledPin, HIGH);             // LEDを光らせる
     analogVal1 = analogRead(analogPin1);    // アナログピンを読み取る
     analogVal2 = analogRead(analogPin2);    // アナログピンを読み取る
-
-    /*
-    lcd.print(analogVal1/10);
-    lcd.print("  ");
-    lcd.print(analogVal2/10);
-    */
 
     // 左手法アルゴリズム　壁に沿って動く
     if (analogVal1>analogVal2){
@@ -109,8 +99,7 @@ void loop() {
     // スイッチがLOWのとき、ロボットは停止
     lcd.print("OFF     ");
     digitalWrite(ledPin, LOW); // LOWなら消える
-    md.setM1Brake(400);
-    md.setM2Brake(400);
+    md.setSpeeds(200,200);
     delay(100);
   }
 }

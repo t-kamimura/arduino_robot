@@ -46,8 +46,9 @@ void stopIfFault()
 // setupは開始時に一回だけ実行される
 void setup() {
   pinMode(ledPin, OUTPUT);    // LED用に出力に設定
+  //pinMode(pin, mode);
+  pinMode(inPin, INPUT);      // スイッチ用に入力に設定
   md.init();                  // モーター初期化
-  Serial.begin(9600);
   lcd.begin(16, 2);           // LCD初期化
   lcd.setContrast(30);        // LCDコントラスト設定
   lcd.print("DEMO");          // LCD表示
@@ -56,7 +57,7 @@ void setup() {
 // 以下、メイン関数
 void loop() {
   lcd.setCursor(0, 1);                      // LCD描画位置設定
-  val = HIGH;//digitalRead(inPin);                 // スイッチの状態を読み込む
+  val = digitalRead(inPin);                 // スイッチの状態を読み込む
   if (val==HIGH){
     /* スイッチがHIGHのとき、ロボットは動く */
     digitalWrite(ledPin, HIGH);             // LEDを光らせる
@@ -68,42 +69,29 @@ void loop() {
     lcd.print("  ");
     lcd.print(analogVal2/10);
     */
-
-    // 左手法アルゴリズム　壁に沿って動く
-    if (analogVal1>analogVal2){
-      valError = analogVal1 - analogVal2;   //センサーの値はどれくらい差があるか？
-      if (valError<30){
-        // センサーの値が近ければ前進
-        lcd.print("Fwd");
-        Serial.println("Fwd");
-        md.setSpeeds(400,400);
-        stopIfFault();
-        delay(100);
-      }else{
-        // 大きく差があれば回転
-        lcd.print("Spin");
-        Serial.println("Spin");
-        md.setSpeeds(400,0);
-        stopIfFault();
-        delay(100);
-      }
-    }else{
-      valError = analogVal2 -analogVal1;
-      if (valError<30){
-        // センサーの値が近ければ前進
-        lcd.print("Fwd");
-        md.setSpeeds(400,400);
-        stopIfFault();
-        delay(100);
-      }else{
-        // 大きく差があれば回転
-        lcd.print("Spin");
-        md.setSpeeds(0,400);
-        stopIfFault();
-        delay(100);
-      }
-    }
-    // 左手法アルゴリズム　ここまで
+    lcd.print("Fwd     ");
+    md.setSpeeds(400,400);
+    stopIfFault();
+    delay(1000);
+    /*
+    lcd.print("Spn     ");
+    md.setSpeeds(-400,400);
+    stopIfFault();
+    delay(1000);
+    lcd.print("Spn     ");
+    md.setSpeeds(400,-400);
+    stopIfFault();
+    delay(1000);
+    lcd.print("Bwd     ");
+    md.setSpeeds(-400,-400);
+    stopIfFault();
+    delay(1000);
+    lcd.print("Stp     ");
+    md.setM1Brake(400);
+    md.setM2Brake(400);
+    stopIfFault();
+    delay(2000);
+    */
 
   }else{
     // スイッチがLOWのとき、ロボットは停止
